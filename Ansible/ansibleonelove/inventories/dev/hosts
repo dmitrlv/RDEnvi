@@ -1,0 +1,8 @@
+[all]
+linux1 ansible_host=172.31.0.220   owner=devops
+
+[ubuntu]
+ubuntu ansible_host=172.31.0.220   owner=devops  public=18.157.177.95
+
+[nginx]
+nginxLinux ansible_host=172.31.5.45 owner=devops public=18.157.80.123

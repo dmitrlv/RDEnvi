@@ -1,0 +1,69 @@
+--- 
+- 
+  become: true
+  hosts: ubuntu
+  tasks: 
+    - 
+      apt: "name=apache2 update_cache=yes state=latest"
+      name: "install apache2"
+    - 
+      apt: name=libapache2-mod-wsgi-py3
+      name: "install mod_wsgi"
+    - 
+      apt: name=python-dev
+      name: "install python-dev"
+    - 
+      apt: name=python-setuptools
+      name: "installs python setup tools"
+    - 
+      apt: name=python3-pip
+      name: "install pip3"
+    - 
+      apt: name=python3-venv
+      name: "install python3 venv"
+    - 
+      file: 
+        path: /home/devops/RDEnvi/ExampleFlask
+        state: directory
+        mode: '0777'
+      name: "create new dir"
+    -
+      pip: 
+        virtualenv: /home/devops/RDEnvi/venv
+        name: flask
+        virtualenv_command: "/usr/bin/python3 -m venv"
+      name: "create venv"
+    -
+      copy:
+        src: __init__.py
+        dest: /home/devops/RDEnvi/__init__.py
+        mode: '0777'
+      name: "copy __init__.py"
+    -
+      copy:
+        src: my_flask_app.py
+        dest: /home/devops/RDEnvi/my_flask_app.py
+        mode: '0777'
+      name: "copy my_flask_app.py"
+    -
+      template:
+        src: ExampleFlask.j2
+        dest: /etc/apache2/sites-available/ExampleFlask.conf
+        mode: '0777'
+      name: "transfer conf file"
+    -
+      template:
+        src: my_flask_app.j2
+        dest: /home/devops/RDEnvi/my_flask_app.wsgi
+        mode: '0777'
+      name: "transfer wsgi file"
+    -
+      shell: /usr/sbin/a2ensite ExampleFlask.conf
+    -
+      systemd:
+        name: apache2
+        daemon_reload: yes
+        state: restarted
+      name: "Restart apache"
+...
+

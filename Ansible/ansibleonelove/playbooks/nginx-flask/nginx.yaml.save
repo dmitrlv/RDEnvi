@@ -1,0 +1,41 @@
+---
+- hosts: nginx
+  remote_user: devops
+  become: yes
+  become_method: sudo
+  vars:
+    - server_port: 8080
+
+  tasks:
+
+    - name: install nginx
+      yum: name=nginx state=present enablerepo=nginx
+
+    - name: serve nginx config
+      template: src=../files/flask.conf dest=/etc/nginx/conf.d/
+      notify:
+      - restart nginx
+
+    - name: install pip
+      yum: name=python-pip state=installed
+
+    - name: install flask
+      pip: name=flask
+
+    - name: serve flask app systemd unit file
+      copy: src=../files/flask-demo.service dest=/etc/systemd/system/
+
+    - name: fetch application
+      git: repo=https://gist.github.com/c454e2e839fcb20605a3.git dest=/opt/flask-demo
+      notify:
+        - restart flask app
+
+    - name: set selinux to permissive for demo
+      selinux: policy=targeted state=permissive
+
+  handlers:
+    - name: restart nginx
+      service: name=nginx state=restarted
+
+    - name: restart flask app
+      service: name=flask-demo state=restarted
