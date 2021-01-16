@@ -3,100 +3,89 @@
   become: true
   hosts: ubuntu
   tasks: 
-    - 
+    # Installs apache, wsgi, python
+    - name: "install apache2"
       apt: "name=apache2 update_cache=yes state=latest"
-      name: "install apache2"
-    - 
+    - name: "install mod_wsgi"
       apt: name=libapache2-mod-wsgi
-      name: "install mod_wsgi"
-    - 
+    - name: "install python-dev"
       apt: name=python-dev
-      name: "install python-dev"
-    -
-      shell: a2enmod wsgi
-      name: "enable a2enmod wsgi"
-    - 
-      name: Creates directory
-      file:
-        path: /var/www/FlaskApp
-        state: directory
-    -
-      name: Creates directory
-      file:
-        path: /var/www/FlaskApp/FlaskApp
-        state: directory
-    -
-      name: Creates directory
-      file:
-        path: /var/www/FlaskApp/FlaskApp/static
-        state: directory
-    -
-      name: Creates directory
-      file:
-        path: /var/www/FlaskApp/FlaskApp/templates
-        state: directory
-    - 
+    - name: "installs python setup tools"
       apt: name=python-setuptools
-      name: "installs python setup tools"
-    - 
+    - name: "install pip"
       apt: name=python-pip
-      name: "install pip"
-    -
-      pip:
+      #Enables WSGI
+    - name: "enable a2enmod wsgi"
+      shell: a2enmod wsgi
+      #Creates directory for the Flask App
+
+
+    # - name: Creates directory
+    #   file:
+    #     path: /var/www/FlaskApp
+    #     state: directory
+    # - name: Creates directory
+    #   file:
+    #     path: /var/www/FlaskApp/FlaskApp
+    #     state: directory
+    # - name: Creates directory
+    #   file:
+    #     path: /var/www/FlaskApp/FlaskApp/static
+    #     state: directory
+    # - name: Creates directory
+    #   file:
+    #     path: /var/www/FlaskApp/FlaskApp/templates
+    #     state: directory
+
+    - git:
+        repo: 'https://github.com/{{ github_user }}/{{ app_name }}.git'
+        dest: /var/www/{{ ansible_ssh_user }}/{{ app_name }}
+        update: yes
+      # Installs VENV and requirements and creates venv environment
+    - pip:
+        requirements: /home/{{ ansible_ssh_user }}/{{ app_name }}/requirements.txt
         name: virtualenv
       name: "install venv"
-    -
+    - name: "create venv"
       shell: virtualenv /var/www/FlaskApp/FlaskApp/venv
-      name: "create venv"
-    -
+    - name: "activate venv" 
       shell: . /var/www/FlaskApp/FlaskApp/venv/bin/activate
-      name: "activate venv" 
-    -
-      pip:
+    - pip:
         name: Flask
       name: "install Flask"
-    -
-      copy:
+    - copy:
         src: __init__.py
         dest: /var/www/FlaskApp/FlaskApp/__init__.py
         mode: '0777'
       name: "copy __init__.py"
-    -
-      template:
+    - template:
         src: FlaskApp.j2
         dest: /etc/apache2/sites-available/FlaskApp.conf
         mode: '0777'
       name: "transfer conf file"
-    -
-      template:
+    - template:
         src: flaskapp.j2
         dest: /var/www/FlaskApp/flaskapp.wsgi
         mode: '0777'
       name: "transfer wsgi file"
-    -
-      shell: /usr/sbin/a2ensite FlaskApp
-    - 
-      name: Ansible delete directory
+    - shell: /usr/sbin/a2ensite FlaskApp
+    - name: Ansible delete directory
       file:
         path: /var/www/html
         state: absent
-    - 
-      name: Ansible delete file
+    - name: Ansible delete file
       file:
         path: /etc/apache2/sites-enabled/000-default.conf
         state: absent
-    - 
-      name: Ansible delete file
+    - name: Ansible delete file
       file:
         path: /etc/apache2/sites-available/default-ssl.conf
         state: absent
-    - 
-      name: Ansible delete file 
+    - name: Ansible delete file 
       file:
         path: /etc/apache2/sites-available/000-default.conf
         state: absent
-    -
-      systemd:
+    - systemd:
         name: apache2
         daemon_reload: yes
         state: restarted
