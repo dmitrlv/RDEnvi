@@ -4,19 +4,28 @@
   hosts: ubuntu
   tasks: 
     # Installs apache, wsgi, python
+    - name: "apt update"
+      apt:
+        update_cache: yes
     - name: "install apache2"
       apt: "name=apache2 update_cache=yes state=latest"
     - name: "install mod_wsgi"
       apt: name=libapache2-mod-wsgi
     - name: "install python-dev"
       apt: name=python-dev
+    - name: "install python3-dev"
+      apt: name=python3-dev
     - name: "installs python setup tools"
       apt: name=python-setuptools
-    - name: "install pip"
-      apt: name=python-pip
+    - name: "install pip3"
+      apt: name=python3-pip
       #Enables WSGI
     - name: "enable a2enmod wsgi"
       shell: a2enmod wsgi
+    - name: "Install virtualenv via pip"
+      pip:
+        name: virtualenv
+        executable: pip3
 
 
       #Creates directory for the Flask App
@@ -37,6 +46,7 @@
         repo: 'https://github.com/{{ github_user }}/{{ app_name }}.git'
         dest: /var/www/{{ app_name }}
         update: yes
+        force: yes
       # Installs VENV and requirements and creates venv environment
     - name: Creates directory
       file:
@@ -46,7 +56,7 @@
       pip:
         requirements: /var/www/{{ app_name }}/requirements.txt
         virtualenv: /var/www/{{ app_name }}/FlaskApp/env
-        virtualenv_python: python3.8
+        virtualenv_python: python3.6
 
     # - name: "activate venv" 
     #   shell: . /var/www/FlaskApp/FlaskApp/venv/bin/activate
@@ -57,6 +67,9 @@
     #     dest: /var/www/FlaskApp/FlaskApp/__init__.py
     #     mode: '0777'
 
+    - name: Move all files & folders to internal folder
+      shell: mv /var/www/{{ app_name }}/* /var/www/{{ app_name }}/FlaskApp
+      ignore_errors: True
     - name: "transfer conf file"
       template:
         src: FlaskAppBig.j2

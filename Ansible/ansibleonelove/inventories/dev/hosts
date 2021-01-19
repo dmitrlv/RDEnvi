@@ -2,7 +2,17 @@
 linux1 ansible_host=172.31.0.220   owner=devops
 
 [ubuntu]
-ubuntu ansible_host=172.31.0.220   owner=devops  public=18.157.177.95
+ubuntu ansible_host=10.102.255.193
+
+[ubuntu:vars]
+# Local Variables for Ansible playbooks
+ansible_ssh_user=ubuntu
+github_user=SlothPivot
+# app_name aligned with git repo name. PUT GIT REPO NAME THERE
+app_name=testBack
+public=127.0.0.1
+
 
 [nginx]
 nginxLinux ansible_host=172.31.5.45 owner=devops public=18.157.80.123
+
