@@ -1,14 +1,14 @@
 <VirtualHost *:80>
      # Add machine's IP address (use ifconfig command)
 		ServerName {{ ansible_default_ipv4.address }}
-                WSGIScriptAlias / /var/www/FlaskApp/flaskapp.wsgi
-		<Directory /var/www/FlaskApp/FlaskApp/>
+                WSGIScriptAlias / /var/www/{{ app_name }}/flaskapp.wsgi
+		<Directory /var/www/{{ app_name }}/FlaskApp/>
                         Options FollowSymLinks
                         AllowOverride None
                         Require all granted
 		</Directory>
-		Alias /static /var/www/FlaskApp/FlaskApp/static
-		<Directory /var/www/FlaskApp/FlaskApp/static/>
+		Alias /static /var/www/{{ app_name }}/FlaskApp/static
+		<Directory /var/www/{{ app_name }}/FlaskApp/static/>
                         Options FollowSymLinks
                         AllowOverride None
                         Require all granted
